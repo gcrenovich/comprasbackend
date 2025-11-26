@@ -19,9 +19,14 @@ class HistorialEstado extends Model
         'comentario'
     ];
 
+   
+
     protected $casts = [
-        'fecha' => 'datetime'
+    'fecha' => 'datetime',
+    'estado_anterior' => 'string',
+    'estado_nuevo' => 'string',
     ];
+
 
     public function requerimiento()
     {

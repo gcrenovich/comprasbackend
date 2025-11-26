@@ -25,6 +25,10 @@ class Proveedor extends Model
         'fecha_alta' => 'datetime',
     ];
 
+    // ==========================
+    // RELACIONES
+    // ==========================
+
     public function presupuestos()
     {
         return $this->hasMany(Presupuesto::class, 'id_proveedor');

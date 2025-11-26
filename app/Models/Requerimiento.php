@@ -26,11 +26,15 @@ class Requerimiento extends Model
     ];
 
     protected $casts = [
-        'fecha_creacion' => 'datetime',
-        'fecha_modificacion' => 'datetime',
+        'fecha_creacion'      => 'datetime',
+        'fecha_modificacion'  => 'datetime',
+        'estado'              => 'string',
     ];
 
-    // Relaciones
+    // ==========================
+    // RELACIONES
+    // ==========================
+
     public function sector()
     {
         return $this->belongsTo(Sector::class, 'id_sector', 'id_sector');
@@ -58,7 +62,7 @@ class Requerimiento extends Model
 
     public function presupuestos()
     {
-        return $this->hasMany(Presupuesto::class, 'id_requerimiento', 'id_requerimiento');
+        return $this->hasMany(Presupuesto::class, 'id_requerimiento');
     }
 
     public function ordenesCompra()
@@ -69,5 +73,26 @@ class Requerimiento extends Model
             'id_requerimiento',
             'id_oc'
         );
+    }
+
+    public function historial()
+    {
+        return $this->hasMany(HistorialEstado::class, 'id_requerimiento');
+    }
+
+    public function auditoria()
+    {
+        return $this->hasMany(AuditoriaRequerimiento::class, 'id_requerimiento');
+    }
+
+    // ==========================
+    // ACCESSORS
+    // ==========================
+
+    public function getArchivoFirmaUrlAttribute()
+    {
+        return $this->archivo_firma_path
+            ? asset('storage/' . $this->archivo_firma_path)
+            : null;
     }
 }

@@ -23,6 +23,10 @@ class PresupuestoItem extends Model
         'precio_unitario' => 'decimal:4',
     ];
 
+    // ==========================
+    // RELACIONES
+    // ==========================
+
     public function presupuesto()
     {
         return $this->belongsTo(Presupuesto::class, 'id_presupuesto');

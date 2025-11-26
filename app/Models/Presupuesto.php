@@ -23,9 +23,11 @@ class Presupuesto extends Model
     ];
 
     protected $casts = [
-        'fecha' => 'datetime',
+        'fecha'     => 'datetime',
         'es_valido' => 'boolean',
     ];
+
+    // == RELACIONES ==
 
     public function requerimiento()
     {
@@ -40,5 +42,20 @@ class Presupuesto extends Model
     public function items()
     {
         return $this->hasMany(PresupuestoItem::class, 'id_presupuesto');
+    }
+
+    // Usuario que cargó la cotización
+    public function usuarioCarga()
+    {
+        return $this->belongsTo(Usuario::class, 'usuario_carga');
+    }
+
+    // == ACCESSORS ==
+
+    public function getArchivoUrlAttribute()
+    {
+        return $this->archivo_path
+            ? asset('storage/' . $this->archivo_path)
+            : null;
     }
 }

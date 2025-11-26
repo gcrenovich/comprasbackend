@@ -15,6 +15,10 @@ class Sector extends Model
         'descripcion'
     ];
 
+    // ===============================
+    // RELACIONES
+    // ===============================
+
     public function usuarios()
     {
         return $this->hasMany(Usuario::class, 'id_sector', 'id_sector');
@@ -23,5 +27,13 @@ class Sector extends Model
     public function requerimientos()
     {
         return $this->hasMany(Requerimiento::class, 'id_sector', 'id_sector');
+    }
+
+    // ===============================
+    // MÉTODOS ÚTILES
+    // ===============================
+    public function __toString()
+    {
+        return $this->nombre;
     }
 }

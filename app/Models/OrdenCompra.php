@@ -22,6 +22,8 @@ class OrdenCompra extends Model
         'fecha' => 'datetime',
     ];
 
+    // == RELACIONES ==
+
     public function proveedor()
     {
         return $this->belongsTo(Proveedor::class, 'id_proveedor');
@@ -35,5 +37,20 @@ class OrdenCompra extends Model
             'id_oc',
             'id_requerimiento'
         );
+    }
+
+    public function ocRequerimientos()
+    {
+        return $this->hasMany(OcRequerimiento::class, 'id_oc');
+    }
+
+    // == ACCESSORS ==
+
+    // Devuelve la URL pública del archivo OC
+    public function getArchivoOcUrlAttribute()
+    {
+        return $this->archivo_oc_path
+            ? asset('storage/' . $this->archivo_oc_path)
+            : null;
     }
 }

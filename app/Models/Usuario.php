@@ -26,7 +26,12 @@ class Usuario extends Model
         'puede_aprobar_nivel2' => 'boolean',
         'activo' => 'boolean',
         'fecha_creacion' => 'datetime',
+        'rol' => 'string'
     ];
+
+    // ===============================
+    // RELACIONES
+    // ===============================
 
     public function sector()
     {
@@ -41,5 +46,24 @@ class Usuario extends Model
     public function requerimientosModificados()
     {
         return $this->hasMany(Requerimiento::class, 'id_usuario_modifica', 'id_usuario');
+    }
+
+    public function historialEstados()
+    {
+        return $this->hasMany(HistorialEstado::class, 'id_usuario', 'id_usuario');
+    }
+
+    public function auditorias()
+    {
+        return $this->hasMany(AuditoriaRequerimiento::class, 'id_usuario', 'id_usuario');
+    }
+
+    // ===============================
+    // MÉTODOS DE AYUDA
+    // ===============================
+
+    public function isAdmin()
+    {
+        return $this->rol === 'ADMIN';
     }
 }
