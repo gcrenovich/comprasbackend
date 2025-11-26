@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Hash;
 class UsuarioService
 {
     /**
-     * Login simple sin JWT (por ahora)
+     * Login REAL usando la columna "password" de la base de datos.
      */
     public function login($email, $password)
     {
@@ -20,14 +20,13 @@ class UsuarioService
             ], 404);
         }
 
-        // ⚠️ Por ahora no usamos password real, porque tu tabla usuarios NO TIENE campo password
-        // Así que por ahora validamos "abc123" como clave global temporal
-
-        if ($password !== 'abc123') {
+        if (!Hash::check($password, $usuario->password)) {
             return response()->json([
                 'error' => 'Credenciales inválidas'
             ], 401);
         }
+
+        unset($usuario->password);
 
         return response()->json([
             'message' => 'Login OK',
@@ -35,9 +34,8 @@ class UsuarioService
         ]);
     }
 
-
     /**
-     * Listar todos los usuarios
+     * Listar usuarios
      */
     public function listar()
     {
@@ -45,7 +43,7 @@ class UsuarioService
     }
 
     /**
-     * Buscar usuario por ID
+     * Ver usuario por ID
      */
     public function ver($id)
     {

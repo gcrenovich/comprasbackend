@@ -1,26 +1,28 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Services;
 
-use Illuminate\Http\Request;
-use App\Services\ArchivoService;
+use Illuminate\Support\Facades\Storage;
 
-class DocumentoController extends Controller
+class ArchivoService
 {
-    protected $archivoService;
-
-    public function __construct(ArchivoService $archivoService)
+    /**
+     * Sube un archivo a /storage/app/public/{rutaPersonalizada}
+     */
+    public function subirArchivo($archivo, $ruta)
     {
-        $this->archivoService = $archivoService;
-    }
+        // Normaliza la ruta sin barras de más
+        $ruta = trim($ruta, '/');
 
-    public function subir(Request $request)
-    {
-        $request->validate([
-            'archivo' => 'required|file|mimes:pdf,jpg,jpeg,png',
-            'path'    => 'required|string'
-        ]);
+        // Guarda el archivo
+        $path = $archivo->store("public/$ruta");
 
-        return $this->archivoService->subirArchivo($request->file('archivo'), $request->path);
+        // Convierte storage/public/... a URL accesible
+        $publicPath = str_replace("public/", "storage/", $path);
+
+        return [
+            'message' => 'Archivo subido correctamente',
+            'path'    => $publicPath
+        ];
     }
 }

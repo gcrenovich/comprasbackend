@@ -26,6 +26,8 @@ class AuthController extends Controller
 
     public function logout()
     {
+        // Si luego usamos JWT o Sanctum, acá eliminamos tokens
         return response()->json(['message' => 'Logout OK']);
     }
 }
+
