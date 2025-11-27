@@ -6,74 +6,72 @@ use App\Models\Presupuesto;
 use App\Models\PresupuestoItem;
 use App\Models\Requerimiento;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class PresupuestoService
 {
     /**
-     * Crear un nuevo presupuesto (cotización)
-     * Soporta versiones (re-cotizaciones)
+     * Crear cotización o recotización
      */
     public function crear($request)
     {
-        $idReq  = $request->id_requerimiento;
-        $idProv = $request->id_proveedor;
+        $req = Requerimiento::find($request->id_requerimiento);
 
-        // Verificar que el requerimiento exista
-        $req = Requerimiento::find($idReq);
         if (!$req) {
             return response()->json(['error' => 'Requerimiento no encontrado'], 404);
         }
 
-        // Obtener versión actual (si existe)
-        $ultima = Presupuesto::where('id_requerimiento', $idReq)
-                             ->where('id_proveedor', $idProv)
-                             ->orderBy('version', 'desc')
-                             ->first();
+        // GENERAR VERSION AUTOMÁTICA
+        $ultimaVersion = Presupuesto::where('id_requerimiento', $req->id_requerimiento)
+            ->where('id_proveedor', $request->id_proveedor)
+            ->max('version');
 
-        $nuevaVersion = $ultima ? $ultima->version + 1 : 1;
+        $version = $ultimaVersion ? $ultimaVersion + 1 : 1;
 
-        // Subir archivo si viene adjunto
-        $filePath = null;
+        // GUARDAR ARCHIVO (si viene)
+        $archivoPath = null;
+
         if ($request->hasFile('archivo')) {
-            $file = $request->file('archivo');
-            $fileName = "presupuesto_{$idReq}_v{$nuevaVersion}_" . time() . "." . $file->getClientOriginalExtension();
-            $folder = "uploads/presupuestos/{$idReq}";
-            $filePath = $file->storeAs($folder, $fileName, 'public');
+
+            $folder = "uploads/presupuestos/" . $req->numero_pic;
+
+            $filename = date('Ymd') . "_presu_v{$version}_" . uniqid() . "." . $request->file('archivo')->getClientOriginalExtension();
+
+            Storage::disk('local')->putFileAs(
+                $folder,
+                $request->file('archivo'),
+                $filename
+            );
+
+            $archivoPath = $folder . "/" . $filename;
         }
 
-        // Crear el presupuesto
+        // CREAR PRESUPUESTO
         $presupuesto = Presupuesto::create([
-            'id_requerimiento' => $idReq,
-            'id_proveedor'     => $idProv,
-            'version'          => $nuevaVersion,
+            'id_requerimiento' => $req->id_requerimiento,
+            'id_proveedor'     => $request->id_proveedor,
+            'version'          => $version,
             'moneda'           => $request->moneda ?? 'ARS',
             'observacion'      => $request->observacion,
-            'archivo_path'     => $filePath,
+            'archivo_path'     => $archivoPath,
             'usuario_carga'    => $request->id_usuario ?? null,
-            'es_valido'        => true
+            'es_valido'        => true,
         ]);
 
-        return [
-            'message'     => 'Presupuesto cargado correctamente',
+        return response()->json([
+            'message'     => 'Cotización registrada correctamente',
             'presupuesto' => $presupuesto
-        ];
+        ], 201);
     }
-
 
     /**
      * Listar presupuestos por requerimiento
      */
     public function listarPorRequerimiento($idReq)
     {
-        $presus = Presupuesto::with(['proveedor'])
-                    ->where('id_requerimiento', $idReq)
-                    ->orderBy('version')
-                    ->get();
-
-        if ($presus->isEmpty()) {
-            return response()->json(['message' => 'No hay presupuestos para este requerimiento'], 200);
-        }
-
-        return $presus;
+        return Presupuesto::with(['proveedor'])
+            ->where('id_requerimiento', $idReq)
+            ->orderBy('version', 'desc')
+            ->get();
     }
 }

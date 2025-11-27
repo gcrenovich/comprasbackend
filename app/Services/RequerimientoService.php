@@ -129,4 +129,18 @@ class RequerimientoService
             ->orderBy('fecha_creacion', 'desc')
             ->get();
     }
+
+    public function listar()
+{
+    return Requerimiento::with([
+            'sector',
+            'centroCosto',
+            'creador',
+            'items',
+            'presupuestos'
+        ])
+        ->orderBy('fecha_creacion', 'desc')
+        ->get();
+}
+
 }
