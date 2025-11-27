@@ -10,16 +10,19 @@ class Usuario extends Model
     protected $primaryKey = 'id_usuario';
     public $timestamps = false;
 
+
     protected $fillable = [
-        'nombre_completo',
-        'email',
-        'id_sector',
-        'rol',
-        'puede_aprobar_nivel1',
-        'puede_aprobar_nivel2',
-        'activo',
-        'fecha_creacion'
-    ];
+  'nombre_completo',
+  'email',
+  'id_sector',
+  'rol',
+  'puede_aprobar_nivel1',
+  'puede_aprobar_nivel2',
+  'activo',
+  'fecha_creacion',
+  'password'
+];
+
 
     protected $casts = [
         'puede_aprobar_nivel1' => 'boolean',
