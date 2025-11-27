@@ -50,7 +50,14 @@ Route::prefix('presupuestos')->group(function () {
 });
 
 // OC
+//Route::prefix('oc')->group(function () {
+  //  Route::post('vincular', [OcController::class, 'vincular']);
+//});
+
+// ---- ORDENES DE COMPRA ----
 Route::prefix('oc')->group(function () {
+    Route::post('crear', [OcController::class, 'crear']);
+    Route::get('ver/{id}', [OcController::class, 'ver']);
     Route::post('vincular', [OcController::class, 'vincular']);
 });
 

@@ -6,34 +6,55 @@ use App\Models\OrdenCompra;
 use App\Models\OcRequerimiento;
 use App\Models\Requerimiento;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class OrdenCompraService
 {
     /**
      * Crear una Orden de Compra (OC)
      */
-    public function crearOC($numero_oc, $id_proveedor, $observacion = null, $archivo_oc_path = null)
+    public function crear($request)
     {
+        // Validar si el proveedor existe se hace en el controlador
+
+        $archivoPath = null;
+
+        if ($request->hasFile('archivo')) {
+            $folder = "uploads/oc/" . $request->numero_oc;
+
+            $filename = date('Ymd') . "_oc_" . $request->numero_oc . "." .
+                        $request->file('archivo')->getClientOriginalExtension();
+
+            Storage::disk('local')->putFileAs(
+                $folder,
+                $request->file('archivo'),
+                $filename
+            );
+
+            $archivoPath = $folder . "/" . $filename;
+        }
+
+        // Crear OC
         $oc = OrdenCompra::create([
-            'numero_oc'      => $numero_oc,
-            'id_proveedor'   => $id_proveedor,
-            'observacion'    => $observacion,
-            'archivo_oc_path'=> $archivo_oc_path,
+            'numero_oc'      => $request->numero_oc,
+            'id_proveedor'   => $request->id_proveedor,
+            'observacion'    => $request->observacion ?? null,
+            'archivo_oc_path'=> $archivoPath
         ]);
 
-        return [
-            'message' => 'OC creada correctamente',
+        return response()->json([
+            'message' => 'Orden de Compra creada correctamente',
             'oc'      => $oc
-        ];
+        ], 201);
     }
 
 
     /**
-     * Obtener una OC
+     * Obtener OC por ID
      */
-    public function verOC($id_oc)
+    public function ver($id)
     {
-        $oc = OrdenCompra::with(['proveedor', 'requerimientos'])->find($id_oc);
+        $oc = OrdenCompra::with(['proveedor', 'requerimientos'])->find($id);
 
         if (!$oc) {
             return response()->json(['error' => 'OC no encontrada'], 404);
@@ -44,11 +65,11 @@ class OrdenCompraService
 
 
     /**
-     * VINCULAR OC ↔ REQUERIMIENTO usando SP
+     * Vincular OC ↔ Requerimiento usando stored procedure
      */
     public function vincularOC($id_oc, $id_requerimiento, $id_usuario)
     {
-        // Verificar existencia antes de llamar al SP
+        // Validaciones iniciales
         $oc = OrdenCompra::find($id_oc);
         if (!$oc) {
             return response()->json(['error' => 'OC no encontrada'], 404);
@@ -59,20 +80,18 @@ class OrdenCompraService
             return response()->json(['error' => 'Requerimiento no encontrado'], 404);
         }
 
-        // Llamada al procedimiento almacenado creado en tu SQL:
-        // sp_registrar_oc_requerimiento(id_oc, id_requerimiento, id_usuario)
-
+        // Ejecutar SP
         DB::select("SELECT sp_registrar_oc_requerimiento(?, ?, ?)", [
             $id_oc,
             $id_requerimiento,
             $id_usuario
         ]);
 
-        return [
-            'message' => 'OC vinculada correctamente al requerimiento',
-            'id_oc'   => $id_oc,
-            'id_requerimiento' => $id_requerimiento
-        ];
+        return response()->json([
+            'message' => 'OC vinculada correctamente',
+            'oc' => $id_oc,
+            'requerimiento' => $id_requerimiento
+        ]);
     }
 
 

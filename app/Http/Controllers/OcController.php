@@ -14,12 +14,37 @@ class OcController extends Controller
         $this->service = $service;
     }
 
+    /**
+     * Crear OC
+     */
+    public function crear(Request $request)
+    {
+        $request->validate([
+            'numero_oc'    => 'required|string',
+            'id_proveedor' => 'required|integer',
+            'archivo'      => 'nullable|file|mimes:pdf,jpg,jpeg,png',
+        ]);
+
+        return $this->service->crear($request);
+    }
+
+    /**
+     * Ver OC
+     */
+    public function ver($id)
+    {
+        return $this->service->ver($id);
+    }
+
+    /**
+     * Vincular OC con un Requerimiento
+     */
     public function vincular(Request $request)
     {
         $request->validate([
-            'id_oc'           => 'required|integer',
-            'id_requerimiento'=> 'required|integer',
-            'id_usuario'      => 'required|integer'
+            'id_oc'            => 'required|integer',
+            'id_requerimiento' => 'required|integer',
+            'id_usuario'       => 'required|integer'
         ]);
 
         return $this->service->vincularOC(
