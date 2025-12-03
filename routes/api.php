@@ -96,3 +96,12 @@ Route::prefix('sectores')->group(function () {
     Route::post('', [SectorController::class, 'crear']);
     Route::put('{id}', [SectorController::class, 'actualizar']);
 });
+
+// Usuarios
+Route::prefix('usuarios')->group(function () {
+    Route::get('', [UsuarioController::class, 'listar']);
+    Route::get('{id}', [UsuarioController::class, 'ver']);
+    Route::post('', [UsuarioController::class, 'crear']);
+    Route::put('{id}', [UsuarioController::class, 'actualizar']);
+    Route::delete('{id}', [UsuarioController::class, 'eliminar']);
+});
